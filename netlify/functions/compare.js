@@ -5,23 +5,6 @@ const MONGODB_URI = process.env.MONGODB_URI
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY
 const DB_NAME = 'auto-timkiem-sosanh'
 
-const MOCK_FALLBACK = {
-  searchQuery: '(Demo - API chưa được cấu hình)',
-  category: 'other',
-  items: [
-    {
-      name: 'Sản phẩm mẫu 1',
-      price: 1800000,
-      location: 'Mẫu - Vui lòng cấu hình API',
-      features: ['Tính năng A', 'Tính năng B', 'Tính năng C'],
-      pros: 'Giá tốt, nhiều tính năng',
-      cons: 'Cần cấu hình API key',
-      aiRating: 7.5,
-      aiComment: 'Vui lòng thêm OPENROUTER_API_KEY vào .env.local',
-    },
-  ],
-}
-
 let mongoClient = null
 
 async function getMongoClient() {
@@ -31,6 +14,19 @@ async function getMongoClient() {
     await mongoClient.connect()
   }
   return mongoClient
+}
+
+function detectCategory(text) {
+  const roomKeywords = ['phòng trọ', 'nhà trọ', 'thuê', 'căn hộ', 'studio', 'chung cư', 'm2', 'm²']
+  const techKeywords = ['bàn phím', 'laptop', 'máy tính', 'pc', 'màn hình', 'tai nghe', 'chuột']
+
+  const lower = text.toLowerCase()
+  const roomScore = roomKeywords.filter((k) => lower.includes(k)).length
+  const techScore = techKeywords.filter((k) => lower.includes(k)).length
+
+  if (roomScore > techScore) return 'room'
+  if (techScore > roomScore) return 'tech'
+  return 'other'
 }
 
 exports.handler = async (event) => {
@@ -65,12 +61,11 @@ exports.handler = async (event) => {
 
     if (!OPENROUTER_API_KEY) {
       return {
-        statusCode: 200,
+        statusCode: 400,
         headers,
         body: JSON.stringify({
-          ...MOCK_FALLBACK,
-          searchQuery: searchQuery || '(Chưa cấu hình API)',
-          note: 'Thiếu OPENROUTER_API_KEY trong .env.local',
+          message: 'Thiếu API key cho AI. Vui lòng cấu hình OPENROUTER_API_KEY hoặc DEEPSEEK_API_KEY trong .env.local',
+          note: 'Cần có API key để sử dụng AI',
         }),
       }
     }
@@ -86,10 +81,9 @@ exports.handler = async (event) => {
 
     let items = []
 
-    try {
-      const systemPrompt = `Bạn là một trợ lý AI chuyên phân tích dữ liệu mua sắm và thuê phòng trọ. Nhiệm vụ của bạn là đọc các đoạn văn bản mô tả thô dưới đây (hoặc nội dung cào từ link) và trích xuất thông tin thành một mảng JSON cấu trúc chuẩn. Tuyệt đối không trả thêm bất kỳ lời thoại nào ngoài JSON.`
+    const systemPrompt = `Bạn là một trợ lý AI chuyên phân tích dữ liệu mua sắm và thuê phòng trọ. Nhiệm vụ của bạn là đọc các đoạn văn bản mô tả thô dưới đây (hoặc nội dung cào từ link) và trích xuất thông tin thành một mảng JSON cấu trúc chuẩn. Tuyệt đối không trả thêm bất kỳ lời thoại nào ngoài JSON.`
 
-      const userPrompt = `Hãy phân tích các thông tin phòng trọ/đồ công nghệ sau đây:
+    const userPrompt = `Hãy phân tích các thông tin phòng trọ/đồ công nghệ sau đây:
 ${text}
 
 Trả về định dạng JSON theo đúng cấu trúc sau:
@@ -108,6 +102,7 @@ Trả về định dạng JSON theo đúng cấu trúc sau:
   ]
 }`
 
+    try {
       const completion = await deepseek.chat.completions.create({
         model: 'deepseek/deepseek-v4-flash:free',
         messages: [
@@ -125,14 +120,29 @@ Trả về định dạng JSON theo đúng cấu trúc sau:
       }
     } catch (aiError) {
       console.error('DeepSeek API error:', aiError.message)
-      items = MOCK_FALLBACK.items.map((item) => ({
-        ...item,
-        pros: `${item.pros} (AI offline: ${aiError.message})`,
-      }))
+      return {
+        statusCode: 502,
+        headers,
+        body: JSON.stringify({
+          message: 'AI không phản hồi. Vui lòng thử lại sau.',
+          error: aiError.message,
+          searchQuery: searchQuery || text.slice(0, 100),
+          category: detectCategory(text),
+        }),
+      }
     }
 
     if (items.length === 0) {
-      items = MOCK_FALLBACK.items
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          message: 'AI không thể trích xuất thông tin từ nội dung bạn cung cấp.',
+          searchQuery: searchQuery || text.slice(0, 100),
+          category: detectCategory(text),
+          items: [],
+        }),
+      }
     }
 
     const doc = {
@@ -164,22 +174,11 @@ Trả về định dạng JSON theo đúng cấu trúc sau:
   } catch (error) {
     console.error('Compare error:', error)
     return {
-      statusCode: 200,
+      statusCode: 500,
       headers,
-      body: JSON.stringify(MOCK_FALLBACK),
+      body: JSON.stringify({
+        message: 'Lỗi server: ' + error.message,
+      }),
     }
   }
-}
-
-function detectCategory(text) {
-  const roomKeywords = ['phòng trọ', 'nhà trọ', 'thuê', 'căn hộ', 'studio', 'chung cư', 'm2', 'm²']
-  const techKeywords = ['bàn phím', 'laptop', 'máy tính', 'pc', 'màn hình', 'tai nghe', 'chuột']
-
-  const lower = text.toLowerCase()
-  const roomScore = roomKeywords.filter((k) => lower.includes(k)).length
-  const techScore = techKeywords.filter((k) => lower.includes(k)).length
-
-  if (roomScore > techScore) return 'room'
-  if (techScore > roomScore) return 'tech'
-  return 'other'
 }

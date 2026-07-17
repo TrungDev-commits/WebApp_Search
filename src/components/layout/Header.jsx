@@ -20,10 +20,9 @@ export default function Header({ title, showBack = false, onBack, className = ''
     try {
       const data = await api.verifyGoogleToken(credentialResponse.credential)
       setUser(data.user, data.token)
-      localStorage.setItem('auth_token', data.token)
       toast.success('Đăng nhập thành công!')
-    } catch {
-      toast.error('Đăng nhập thất bại')
+    } catch (err) {
+      toast.error(err.message || 'Đăng nhập thất bại')
     }
   }
 

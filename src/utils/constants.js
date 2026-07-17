@@ -16,5 +16,5 @@ export const ROUTES = {
   HISTORY: '/history',
 }
 
-export const DEEPSEEK_MODEL = 'deepseek-v4-flash'
-export const DEEPSEEK_BASE_URL = 'https://api.deepseek.com/v1'
+export const DEEPSEEK_MODEL = 'deepseek/deepseek-v4-flash:free'
+export const DEEPSEEK_BASE_URL = 'https://openrouter.ai/api/v1'

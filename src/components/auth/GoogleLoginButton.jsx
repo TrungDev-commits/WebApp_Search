@@ -10,10 +10,9 @@ export default function GoogleLoginButton() {
     try {
       const data = await api.verifyGoogleToken(credentialResponse.credential)
       setUser(data.user, data.token)
-      localStorage.setItem('auth_token', data.token)
       toast.success('Đăng nhập thành công!')
     } catch (err) {
-      toast.error('Đăng nhập thất bại')
+      toast.error(err.message || 'Đăng nhập thất bại')
     }
   }
 

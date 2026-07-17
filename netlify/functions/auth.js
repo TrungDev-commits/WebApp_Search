@@ -1,7 +1,7 @@
 const crypto = require('crypto')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production'
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID
 
 function base64url(str) {
   return Buffer.from(str)
@@ -26,6 +26,26 @@ function createToken(payload) {
   return `${encodedHeader}.${encodedPayload}.${signature}`
 }
 
+function verifyToken(token) {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const header = JSON.parse(Buffer.from(parts[0], 'base64').toString())
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString())
+    const expectedSig = crypto
+      .createHmac('sha256', JWT_SECRET)
+      .update(`${parts[0]}.${parts[1]}`)
+      .digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+    if (parts[2] !== expectedSig) return null
+    return payload
+  } catch {
+    return null
+  }
+}
+
 async function verifyGoogleToken(credential) {
   const verifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`
   const res = await fetch(verifyUrl)
@@ -37,7 +57,7 @@ async function verifyGoogleToken(credential) {
 
   const payload = await res.json()
 
-  if (payload.aud !== GOOGLE_CLIENT_ID) {
+  if (GOOGLE_CLIENT_ID && payload.aud !== GOOGLE_CLIENT_ID) {
     throw new Error('Token audience mismatch - wrong Client ID')
   }
 
@@ -90,3 +110,6 @@ exports.handler = async (event) => {
     }
   }
 }
+
+// Expose verifyToken for other functions
+exports.verifyToken = verifyToken
