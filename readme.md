@@ -1,13 +1,3 @@
-À lôi, quay xe khét lẹt vậy ní! Đang là trùm LaravelNestJS + Vue tự nhiên nay đòi đổi gió qua Full ReactJS + MongoDB để deploy lên Netlify hả
-
-Mà cũng đúng, chơi combo này để deploy lên Netlify thì cực kỳ kinh tế (hầu hết là free) và siêu nhanh cho một con dự án cá nhân. Tuy nhiên, dân chuyên nghiệp nhìn vào là thấy có một cái bẫy kỹ thuật liền Netlify chỉ deploy được Frontend tĩnh (ReactJS), nó không chạy được server Node.jsExpress (Back-end truyền thống) để kết nối trực tiếp với MongoDB đâu.
-
-Để giải quyết quả này và giúp mày deploy thành công 100% lên Netlify hoàn toàn miễn phí, tao sẽ thiết kế kiến trúc theo hướng Serverless (dùng Netlify Functions để làm Back-end API kết nối MongoDB) nha.
-
-Dưới đây là mô tả chi tiết từ A-Z cấu trúc con Web App này cho mày bắt tay vào code
-
----
-
 ## 🚀 KIẾN TRÚC HỆ THỐNG (Serverless Stack)
 
  Front-end ReactJS (Vite + TailwindCSS) - Deploy lên Netlify.
