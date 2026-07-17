@@ -1,0 +1,17 @@
+{
+  "name": "So Sánh Thông Minh",
+  "short_name": "So Sánh",
+  "description": "AI Tìm Kiếm & So Sánh Sản Phẩm Thông Minh",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D9488",
+  "theme_color": "#0D9488",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

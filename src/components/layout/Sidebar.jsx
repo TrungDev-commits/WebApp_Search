@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { MagnifyingGlassIcon, ArrowsRightLeftIcon, ClockIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import useAuthStore from '../../stores/useAuthStore'
 import UserAvatar from '../auth/UserAvatar'
+import GoogleLoginButton from '../auth/GoogleLoginButton'
 
 const links = [
   { to: '/', label: 'Tra cứu', icon: MagnifyingGlassIcon },
@@ -50,9 +51,10 @@ export default function Sidebar() {
             </div>
           </div>
         ) : (
-          <p className="text-xs text-slate-400 text-center px-2">
-            <NavLink to="/history" className="text-brand-600 hover:underline">Đăng nhập</NavLink> để đồng bộ
-          </p>
+          <div className="px-2">
+            <p className="text-xs text-slate-400 text-center mb-3">Đăng nhập để đồng bộ lịch sử</p>
+            <GoogleLoginButton />
+          </div>
         )}
       </div>
     </aside>

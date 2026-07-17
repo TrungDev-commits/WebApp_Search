@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0D9488"/>
+      <stop offset="100%" stop-color="#0F766E"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#F97316"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1050" cy="150" r="250" fill="#0F766E" opacity=".4"/>
+  <circle cx="200" cy="500" r="180" fill="#0D9488" opacity=".3"/>
+  <path d="M340 280h180v40H340zm0 60h240v40H340zm0 60h200v40H340z" fill="#fff" opacity=".8"/>
+  <path d="M680 280h160v160H680z" fill="#fff" opacity=".8"/>
+  <path d="M680 300h140v12H680zm0 30h100v12H680zm0 30h120v12H680z" fill="#0D9488" opacity=".3"/>
+  <text x="120" y="220" font-family="system-ui,-apple-system,sans-serif" font-size="72" font-weight="800" fill="#fff">So Sánh</text>
+  <text x="120" y="300" font-family="system-ui,-apple-system,sans-serif" font-size="72" font-weight="800" fill="#fff">Thông Minh</text>
+  <rect x="120" y="330" width="80" height="6" rx="3" fill="url(#accent)"/>
+  <text x="120" y="400" font-family="system-ui,-apple-system,sans-serif" font-size="28" fill="#fff" opacity=".85">AI Tìm Kiếm &amp; So Sánh Sản Phẩm Thông Minh</text>
+  <text x="120" y="450" font-family="system-ui,-apple-system,sans-serif" font-size="22" fill="#fff" opacity=".6">Phòng trọ · Đồ công nghệ · Đánh giá AI</text>
+</svg>

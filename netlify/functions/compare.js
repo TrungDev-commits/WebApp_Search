@@ -2,7 +2,7 @@ const { MongoClient } = require('mongodb')
 const OpenAI = require('openai')
 
 const MONGODB_URI = process.env.MONGODB_URI
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY
 const DB_NAME = 'auto-timkiem-sosanh'
 
 const MOCK_FALLBACK = {
@@ -17,7 +17,7 @@ const MOCK_FALLBACK = {
       pros: 'Giá tốt, nhiều tính năng',
       cons: 'Cần cấu hình API key',
       aiRating: 7.5,
-      aiComment: 'Vui lòng thêm DEEPSEEK_API_KEY và MONGODB_URI vào .env.local',
+      aiComment: 'Vui lòng thêm OPENROUTER_API_KEY vào .env.local',
     },
   ],
 }
@@ -63,21 +63,25 @@ exports.handler = async (event) => {
       }
     }
 
-    if (!DEEPSEEK_API_KEY) {
+    if (!OPENROUTER_API_KEY) {
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
           ...MOCK_FALLBACK,
           searchQuery: searchQuery || '(Chưa cấu hình API)',
-          note: 'Thiếu DEEPSEEK_API_KEY trong .env.local',
+          note: 'Thiếu OPENROUTER_API_KEY trong .env.local',
         }),
       }
     }
 
     const deepseek = new OpenAI({
-      baseURL: 'https://api.deepseek.com/v1',
-      apiKey: DEEPSEEK_API_KEY,
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: OPENROUTER_API_KEY,
+      defaultHeaders: {
+        'HTTP-Referer': 'https://auto-timkiem-sosanh.netlify.app',
+        'X-Title': 'Auto Tìm Kiếm So Sánh',
+      },
     })
 
     let items = []
@@ -105,7 +109,7 @@ Trả về định dạng JSON theo đúng cấu trúc sau:
 }`
 
       const completion = await deepseek.chat.completions.create({
-        model: 'deepseek-v4-flash',
+        model: 'deepseek/deepseek-v4-flash:free',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
